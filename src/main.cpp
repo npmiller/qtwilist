@@ -3,6 +3,7 @@
 
 int main(int argc, char *argv[])
 {
+    QCoreApplication::setApplicationName("QTwiList");
     QApplication app(argc, argv);
     qtwilist w;
     w.show();
