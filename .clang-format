@@ -1,0 +1,4 @@
+# Use LLVM style but with tabs for indentation
+BasedOnStyle: LLVM
+IndentWidth: 8
+UseTab: ForIndentation
