@@ -151,12 +151,12 @@ void StreamList::finishedCheckLive() {
 		Stream *s = streams.at(i);
 		for (int j = 0; j < total; ++j) {
 			if (0 ==
-			    QString::compare(arr[i]
+			    QString::compare(arr[j]
 			                         .toObject()["channel"]
 			                         .toObject()["display_name"]
 			                         .toString(),
 			                     s->name, Qt::CaseInsensitive)) {
-				qDebug() << "match";
+				qDebug() << "match: " << s->name << i << streams.size();
 				live = true;
 			}
 		}
