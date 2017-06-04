@@ -2,57 +2,57 @@
 #define STREAMLIST_H
 
 #include <QAbstractListModel>
-#include <QSettings>
-#include <QUrl>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
 #include <QList>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QSettings>
 #include <QSslError>
 #include <QTimer>
+#include <QUrl>
 
 class Stream : public QObject {
 	Q_OBJECT
 
-	public:
-	Stream(QString name, QNetworkAccessManager& manager, QObject * parent = 0);
-	Stream(Stream && s);
+      public:
+	Stream(QString name, QNetworkAccessManager &manager,
+	       QObject *parent = 0);
+	Stream(Stream &&s);
 	void fetch();
 
-	public slots:
-		void finishedUser();
-		void finishedLogo();
+      public slots:
+	void finishedUser();
+	void finishedLogo();
 
-	public:
+      public:
 	QString name;
 	bool live;
 	QString logo_path;
 	QString id;
 
-	private:
-	QNetworkAccessManager& manager;
+      private:
+	QNetworkAccessManager &manager;
 	QNetworkReply *reply;
 };
 
-class StreamList : public QAbstractListModel
-{
+class StreamList : public QAbstractListModel {
 	Q_OBJECT
-public:
-	StreamList(QObject * parent = 0);
-	virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
+      public:
+	StreamList(QObject *parent = 0);
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 	void add(QString name);
 	void remove(QModelIndex index);
-	virtual QVariant data(const QModelIndex & index, int role) const;
-	virtual ~StreamList() {};
+	virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual ~StreamList(){};
 
-	QVector<Stream*> streams;
+	QVector<Stream *> streams;
 	QNetworkAccessManager manager;
 
-	public slots:
-		void finishedCheckLive();
-		void checkLive();
+      public slots:
+	void finishedCheckLive();
+	void checkLive();
 
-private:
+      private:
 	QNetworkReply *reply;
 	QTimer timer;
 };

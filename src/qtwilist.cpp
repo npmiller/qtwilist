@@ -1,40 +1,41 @@
 #include "qtwilist.h"
-#include "ui_qtwilist.h"
 #include "ui_adddialog.h"
+#include "ui_qtwilist.h"
 
-#include <QProcess>
 #include <QDebug>
 #include <QDialog>
-
+#include <QProcess>
 
 AddDialog::AddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::adddialog) {
-    ui->setupUi(this);
+	ui->setupUi(this);
 }
 
-qtwilist::qtwilist(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::qtwilist),
-	process(new QProcess(this)), list()
-{
-    ui->setupUi(this);
+qtwilist::qtwilist(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::qtwilist), process(new QProcess(this)),
+      list() {
+	ui->setupUi(this);
 	ui->streamList->setModel(&list);
 
 	ui->mainToolBar->addAction(ui->actionPlay);
 	ui->mainToolBar->addAction(ui->actionAdd);
 	ui->mainToolBar->addAction(ui->actionRemove);
 
-	connect(ui->actionPlay, SIGNAL(triggered(bool)), this, SLOT(startStream(bool)));
+	connect(ui->actionPlay, SIGNAL(triggered(bool)), this,
+	        SLOT(startStream(bool)));
 	connect(ui->actionAdd, &QAction::triggered, this, &qtwilist::actionAdd);
-	connect(ui->actionRemove, &QAction::triggered, this, &qtwilist::actionRemove);
+	connect(ui->actionRemove, &QAction::triggered, this,
+	        &qtwilist::actionRemove);
 
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(done(int, QProcess::ExitStatus)));
+	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+	        SLOT(done(int, QProcess::ExitStatus)));
 
 	QSettings settings;
-	command = settings.value("command", "streamlink twitch.tv/%1 best").toString();
+	command = settings.value("command", "streamlink twitch.tv/%1 best")
+	              .toString();
 }
 
 void qtwilist::actionAdd(bool checked) {
-	AddDialog* dialog = new AddDialog(this);
+	AddDialog *dialog = new AddDialog(this);
 	if (QDialog::Accepted == dialog->exec()) {
 		QString name = dialog->ui->lineEdit->text().trimmed();
 		if (!name.isEmpty()) {
@@ -69,7 +70,4 @@ void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {
 	ui->actionPlay->setEnabled(true);
 }
 
-qtwilist::~qtwilist()
-{
-    delete ui;
-}
+qtwilist::~qtwilist() { delete ui; }

@@ -1,26 +1,28 @@
 #include "streamlist.h"
 
-#include <QObject>
-#include <QSettings>
 #include <QAbstractListModel>
-#include <QIcon>
-#include <QNetworkRequest>
 #include <QByteArray>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QDebug>
+#include <QDir>
+#include <QIcon>
+#include <QImage>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
-#include <QImage>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QSettings>
 #include <QSize>
 #include <QStandardPaths>
-#include <QDir>
 
 static constexpr char client_id[] = "";
 static constexpr char url_base[] = "https://api.twitch.tv/kraken";
 
-Stream::Stream(QString name, QNetworkAccessManager& manager, QObject *parent) : QObject(parent), name(name), live(false), manager(manager), reply(nullptr) {
+Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
+    : QObject(parent), name(name), live(false), manager(manager),
+      reply(nullptr) {
 	// load from settings
 	QSettings settings;
 	settings.beginGroup("streams");
@@ -40,14 +42,16 @@ Stream::Stream(QString name, QNetworkAccessManager& manager, QObject *parent) : 
 
 void Stream::fetch() {
 	qDebug() << "fetch";
-	QNetworkRequest request(QUrl(QString(url_base) + "/users?login=" + name));
-	request.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"), QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	QNetworkRequest request(
+	    QUrl(QString(url_base) + "/users?login=" + name));
+	request.setRawHeader(QByteArray("Accept"),
+	                     QByteArray("application/vnd.twitchtv.v5+json"));
+	request.setRawHeader(QByteArray("Client-ID"),
+	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
 
 	reply = manager.get(request);
-	connect(reply, &QNetworkReply::finished , this, &Stream::finishedUser);
+	connect(reply, &QNetworkReply::finished, this, &Stream::finishedUser);
 }
-
 
 void Stream::finishedUser() {
 	qDebug() << "Finished user";
@@ -62,15 +66,20 @@ void Stream::finishedUser() {
 	id = obj["users"].toArray()[0].toObject()["_id"].toString();
 
 	// mark network reply for deletion
-	disconnect(reply, &QNetworkReply::finished , this, &Stream::finishedUser);
+	disconnect(reply, &QNetworkReply::finished, this,
+	           &Stream::finishedUser);
 	reply->deleteLater();
 
 	// download user logo
-	QNetworkRequest request(QUrl(obj["users"].toArray()[0].toObject()["logo"].toString()));
-	request.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"), QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	QNetworkRequest request(
+	    QUrl(obj["users"].toArray()[0].toObject()["logo"].toString()));
+	request.setRawHeader(QByteArray("Accept"),
+	                     QByteArray("application/vnd.twitchtv.v5+json"));
+	request.setRawHeader(QByteArray("Client-ID"),
+	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
 	QNetworkReply *logo_reply = manager.get(request);
-	connect(logo_reply, &QNetworkReply::finished , this, &Stream::finishedLogo);
+	connect(logo_reply, &QNetworkReply::finished, this,
+	        &Stream::finishedLogo);
 
 	// store the user id in the settings
 	QSettings settings;
@@ -82,14 +91,16 @@ void Stream::finishedUser() {
 }
 
 void Stream::finishedLogo() {
-	QNetworkReply* reply = static_cast<QNetworkReply*>(sender());
+	QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
 
-	QDir dir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
+	QDir dir(
+	    QStandardPaths::writableLocation(QStandardPaths::CacheLocation));
 
 	// create dir if it doesn't exist
 	dir.mkpath(dir.path());
 
-	QString ext = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+	QString ext =
+	    reply->header(QNetworkRequest::ContentTypeHeader).toString();
 	// image/<extension>
 	ext.remove(0, 6);
 
@@ -108,14 +119,16 @@ void Stream::finishedLogo() {
 	settings.endGroup();
 
 	reply->deleteLater();
-	disconnect(reply, &QNetworkReply::finished , this, &Stream::finishedLogo);
+	disconnect(reply, &QNetworkReply::finished, this,
+	           &Stream::finishedLogo);
 }
 
 void StreamList::finishedCheckLive() {
 	qDebug() << "Finished streams";
 	QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
 
-	disconnect(reply, &QNetworkReply::finished , this, &StreamList::finishedCheckLive);
+	disconnect(reply, &QNetworkReply::finished, this,
+	           &StreamList::finishedCheckLive);
 	reply->deleteLater();
 
 	if (!doc.isObject()) {
@@ -137,7 +150,12 @@ void StreamList::finishedCheckLive() {
 		bool live = false;
 		Stream *s = streams.at(i);
 		for (int j = 0; j < total; ++j) {
-			if (0 == QString::compare(arr[i].toObject()["channel"].toObject()["display_name"].toString(),s->name, Qt::CaseInsensitive)) {
+			if (0 ==
+			    QString::compare(arr[i]
+			                         .toObject()["channel"]
+			                         .toObject()["display_name"]
+			                         .toString(),
+			                     s->name, Qt::CaseInsensitive)) {
 				qDebug() << "match";
 				live = true;
 			}
@@ -161,10 +179,11 @@ void StreamList::finishedCheckLive() {
 	}
 }
 
-StreamList::StreamList(QObject* parent) : QAbstractListModel(parent), manager(parent) {
+StreamList::StreamList(QObject *parent)
+    : QAbstractListModel(parent), manager(parent) {
 	QSettings settings;
 	settings.beginGroup("streams");
-	Q_FOREACH(QString s, settings.childGroups()) {
+	Q_FOREACH (QString s, settings.childGroups()) {
 		streams.append(new Stream(s, manager, this));
 	}
 	settings.endGroup();
@@ -192,11 +211,14 @@ void StreamList::checkLive() {
 
 	// request streams information
 	QNetworkRequest request(url);
-	request.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"), QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	request.setRawHeader(QByteArray("Accept"),
+	                     QByteArray("application/vnd.twitchtv.v5+json"));
+	request.setRawHeader(QByteArray("Client-ID"),
+	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
 
 	reply = manager.get(request);
-	connect(reply, &QNetworkReply::finished , this, &StreamList::finishedCheckLive);
+	connect(reply, &QNetworkReply::finished, this,
+	        &StreamList::finishedCheckLive);
 }
 
 void StreamList::add(QString name) {
@@ -227,25 +249,25 @@ void StreamList::remove(QModelIndex index) {
 	delete s;
 }
 
-int StreamList::rowCount(const QModelIndex & parent) const {
+int StreamList::rowCount(const QModelIndex &parent) const {
 	return streams.size();
 };
 
-
-QVariant StreamList::data(const QModelIndex & index, int role) const {
+QVariant StreamList::data(const QModelIndex &index, int role) const {
 	if (!index.isValid())
 		return QVariant();
 
 	if (index.row() >= rowCount())
 		return QVariant();
 
-	const Stream* s = streams.at(index.row());
+	const Stream *s = streams.at(index.row());
 
 	switch (role) {
-		case Qt::DisplayRole:
-			return s->name + (s->live ? " - live" : QString());
-		case Qt::DecorationRole:
-			return (s->logo_path.isEmpty() ? QVariant() : QIcon(s->logo_path));
+	case Qt::DisplayRole:
+		return s->name + (s->live ? " - live" : QString());
+	case Qt::DecorationRole:
+		return (s->logo_path.isEmpty() ? QVariant()
+		                               : QIcon(s->logo_path));
 	}
 
 	return QVariant();
