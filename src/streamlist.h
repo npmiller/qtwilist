@@ -9,20 +9,44 @@
 #include <QList>
 #include <QSslError>
 
-class TwitchAPI : QObject {
+/* class TwitchAPI : QObject { */
+/* 	Q_OBJECT */
+/* 	public: */
+/* 	TwitchAPI(QObject *parent = 0); */
+/* 	void getUser(QString name); */
+
+/* 	public slots: */
+/* 	void replyFinished(QNetworkReply* reply); */
+/* 	void readyRead(); */
+/* 	void error(QNetworkReply::NetworkError err); */
+/* 	void sslErrors(QList<QSslError> errs); */
+
+/* 	private: */
+/* 		QNetworkAccessManager manager; */
+/* }; */
+
+class Stream : public QObject {
 	Q_OBJECT
+
 	public:
-	TwitchAPI(QObject *parent = 0);
-	void getUser(QString name);
+	Stream(QString name, QNetworkAccessManager& manager, QObject * parent = 0);
+	Stream(Stream && s);
+	void fetch();
 
 	public slots:
-		void replyFinished(QNetworkReply* reply);
-	void readyRead();
-	void error(QNetworkReply::NetworkError err);
-	void sslErrors(QList<QSslError> errs);
+		void finishedUser();
+		void finishedStreams();
+		void finishedLogo();
+
+	public:
+	QString name;
+	bool live;
+	QString logo_path;
 
 	private:
-		QNetworkAccessManager manager;
+	QNetworkAccessManager& manager;
+	QNetworkReply *reply;
+	QString id;
 };
 
 class StreamList : public QAbstractListModel
@@ -35,8 +59,8 @@ public:
 	virtual QVariant data(const QModelIndex & index, int role) const;
 	virtual ~StreamList() {};
 
-	QStringList streams;
-	TwitchAPI api;
+	QVector<Stream*> streams;
+	QNetworkAccessManager manager;
 
 };
 

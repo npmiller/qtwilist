@@ -57,7 +57,7 @@ void qtwilist::actionRemove(bool checked) {
 	auto selection = ui->streamList->selectionModel()->selectedIndexes();
 	if (selection.size() <= 0)
 		return;
-	QString stream_name = list.streams.at(selection.at(0).row());
+	QString stream_name = list.streams.at(selection.at(0).row())->name;
 
 	QSettings settings;
 	settings.beginGroup("streams");
@@ -71,7 +71,7 @@ void qtwilist::startStream(bool checked) {
 	auto selection = ui->streamList->selectionModel()->selectedIndexes();
 	if (selection.size() <= 0)
 		return;
-	QString stream_name = list.streams.at(selection.at(0).row());
+	QString stream_name = list.streams.at(selection.at(0).row())->name;
 	QStringList cmd = command.arg(stream_name).split(" ");
 	QString prg = cmd.takeFirst();
 	process->start(prg, cmd);
