@@ -8,22 +8,7 @@
 #include <QNetworkAccessManager>
 #include <QList>
 #include <QSslError>
-
-/* class TwitchAPI : QObject { */
-/* 	Q_OBJECT */
-/* 	public: */
-/* 	TwitchAPI(QObject *parent = 0); */
-/* 	void getUser(QString name); */
-
-/* 	public slots: */
-/* 	void replyFinished(QNetworkReply* reply); */
-/* 	void readyRead(); */
-/* 	void error(QNetworkReply::NetworkError err); */
-/* 	void sslErrors(QList<QSslError> errs); */
-
-/* 	private: */
-/* 		QNetworkAccessManager manager; */
-/* }; */
+#include <QTimer>
 
 class Stream : public QObject {
 	Q_OBJECT
@@ -35,33 +20,41 @@ class Stream : public QObject {
 
 	public slots:
 		void finishedUser();
-		void finishedStreams();
 		void finishedLogo();
 
 	public:
 	QString name;
 	bool live;
 	QString logo_path;
+	QString id;
 
 	private:
 	QNetworkAccessManager& manager;
 	QNetworkReply *reply;
-	QString id;
 };
 
 class StreamList : public QAbstractListModel
 {
+	Q_OBJECT
 public:
 	StreamList(QObject * parent = 0);
 	virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
 
-	void reload();
+	void add(QString name);
+	void remove(QModelIndex index);
 	virtual QVariant data(const QModelIndex & index, int role) const;
 	virtual ~StreamList() {};
 
 	QVector<Stream*> streams;
 	QNetworkAccessManager manager;
 
+	public slots:
+		void finishedCheckLive();
+		void checkLive();
+
+private:
+	QNetworkReply *reply;
+	QTimer timer;
 };
 
 #endif

@@ -19,11 +19,7 @@ Q_OBJECT
 	public:
 	AddDialog(QWidget *parent = nullptr);
 
-	public slots:
-		void addStream();
-
-	private:
-		Ui::adddialog *ui;
+	Ui::adddialog *ui;
 };
 
 class qtwilist : public QMainWindow

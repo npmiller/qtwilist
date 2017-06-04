@@ -9,19 +9,6 @@
 
 AddDialog::AddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::adddialog) {
     ui->setupUi(this);
-	connect(this, &QDialog::accepted, this, &AddDialog::addStream);
-}
-void AddDialog::addStream() {
-	QString name = ui->lineEdit->text().trimmed();
-	if (name.isEmpty())
-		return;
-
-	QSettings settings;
-	settings.beginGroup("streams");
-	settings.beginGroup(name);
-	settings.setValue("link", name);
-	settings.endGroup();
-	settings.endGroup();
 }
 
 qtwilist::qtwilist(QWidget *parent) :
@@ -49,7 +36,10 @@ qtwilist::qtwilist(QWidget *parent) :
 void qtwilist::actionAdd(bool checked) {
 	AddDialog* dialog = new AddDialog(this);
 	if (QDialog::Accepted == dialog->exec()) {
-		list.reload();
+		QString name = dialog->ui->lineEdit->text().trimmed();
+		if (!name.isEmpty()) {
+			list.add(name);
+		}
 	}
 }
 
@@ -57,13 +47,8 @@ void qtwilist::actionRemove(bool checked) {
 	auto selection = ui->streamList->selectionModel()->selectedIndexes();
 	if (selection.size() <= 0)
 		return;
-	QString stream_name = list.streams.at(selection.at(0).row())->name;
 
-	QSettings settings;
-	settings.beginGroup("streams");
-	settings.remove(stream_name);
-	settings.endGroup();
-	list.reload();
+	list.remove(selection.at(0));
 }
 
 void qtwilist::startStream(bool checked) {
@@ -77,7 +62,6 @@ void qtwilist::startStream(bool checked) {
 	process->start(prg, cmd);
 	ui->statusBar->showMessage("Playing: " + stream_name);
 	ui->actionPlay->setEnabled(false);
-	
 }
 
 void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {
