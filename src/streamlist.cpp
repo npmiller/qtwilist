@@ -188,11 +188,12 @@ StreamList::StreamList(QObject *parent)
 	}
 	settings.endGroup();
 
-	// check for live channels every minute
-	timer.setInterval(1000 * 60);
-	connect(&timer, &QTimer::timeout, this, &StreamList::checkLive);
 	checkLive();
-	timer.start();
+
+	// check for live channels every minute
+	/* timer.setInterval(1000 * 60); */
+	/* connect(&timer, &QTimer::timeout, this, &StreamList::checkLive); */
+	/* timer.start(); */
 };
 
 void StreamList::checkLive() {

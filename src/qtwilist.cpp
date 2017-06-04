@@ -19,12 +19,15 @@ qtwilist::qtwilist(QWidget *parent)
 	ui->mainToolBar->addAction(ui->actionPlay);
 	ui->mainToolBar->addAction(ui->actionAdd);
 	ui->mainToolBar->addAction(ui->actionRemove);
+	ui->mainToolBar->addAction(ui->actionRefresh);
 
 	connect(ui->actionPlay, SIGNAL(triggered(bool)), this,
 	        SLOT(startStream(bool)));
 	connect(ui->actionAdd, &QAction::triggered, this, &qtwilist::actionAdd);
 	connect(ui->actionRemove, &QAction::triggered, this,
 	        &qtwilist::actionRemove);
+	connect(ui->actionRefresh, &QAction::triggered, &list,
+	        &StreamList::checkLive);
 
 	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
 	        SLOT(done(int, QProcess::ExitStatus)));
