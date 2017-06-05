@@ -19,6 +19,7 @@ class Stream : public QObject {
 	       QObject *parent = 0);
 	Stream(Stream &&s);
 	void fetch();
+	void toggleLive();
 
       public slots:
 	void finishedUser();

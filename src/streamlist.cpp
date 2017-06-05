@@ -35,7 +35,7 @@ Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
 	settings.endGroup();
 	
 	if (!logo_path.isEmpty()) {
-		decoration = QIcon(logo_path).pixmap(40 ,40);
+		decoration = QIcon(logo_path).pixmap(40 ,40, QIcon::Disabled);
 	} else {
 		decoration = QPixmap(QSize(40, 40));
 		decoration.fill();
@@ -97,6 +97,15 @@ void Stream::finishedUser() {
 	settings.endGroup();
 }
 
+void Stream::toggleLive() {
+	live = !live;
+
+	if (!logo_path.isEmpty()) {
+		decoration = QIcon(logo_path).pixmap(
+		    40, 40, live ? QIcon::Normal : QIcon::Disabled);
+	}
+}
+
 void Stream::finishedLogo() {
 	QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
 
@@ -125,7 +134,8 @@ void Stream::finishedLogo() {
 	settings.endGroup();
 	settings.endGroup();
 
-	decoration = QIcon(logo_path).pixmap(40 ,40);
+	decoration = QIcon(logo_path).pixmap(
+	    40, 40, live ? QIcon::Normal : QIcon::Disabled);
 
 	reply->deleteLater();
 	disconnect(reply, &QNetworkReply::finished, this,
@@ -171,7 +181,7 @@ void StreamList::finishedCheckLive() {
 		}
 
 		if (live != s->live) {
-			s->live = live;
+			s->toggleLive();
 
 			// first index to have changed
 			mini = (mini < 0) ? i : mini;
