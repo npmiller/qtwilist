@@ -5,6 +5,7 @@
 #include <QList>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QPixmap>
 #include <QSettings>
 #include <QSslError>
 #include <QTimer>
@@ -28,6 +29,7 @@ class Stream : public QObject {
 	bool live;
 	QString logo_path;
 	QString id;
+	QPixmap decoration;
 
       private:
 	QNetworkAccessManager &manager;

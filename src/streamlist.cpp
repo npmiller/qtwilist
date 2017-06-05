@@ -33,6 +33,13 @@ Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
 
 	settings.endGroup();
 	settings.endGroup();
+	
+	if (!logo_path.isEmpty()) {
+		decoration = QIcon(logo_path).pixmap(40 ,40);
+	} else {
+		decoration = QPixmap(QSize(40, 40));
+		decoration.fill();
+	}
 
 	// if these information isn't in the settings fetch it
 	if (id.isEmpty() || logo_path.isEmpty()) {
@@ -117,6 +124,8 @@ void Stream::finishedLogo() {
 	settings.setValue("logo", logo_path);
 	settings.endGroup();
 	settings.endGroup();
+
+	decoration = QIcon(logo_path).pixmap(40 ,40);
 
 	reply->deleteLater();
 	disconnect(reply, &QNetworkReply::finished, this,
@@ -267,8 +276,7 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 	case Qt::DisplayRole:
 		return s->name + (s->live ? " - live" : QString());
 	case Qt::DecorationRole:
-		return (s->logo_path.isEmpty() ? QVariant()
-		                               : QIcon(s->logo_path));
+		return s->decoration;
 	}
 
 	return QVariant();
