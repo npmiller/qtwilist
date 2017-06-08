@@ -20,6 +20,7 @@ qtwilist::qtwilist(QWidget *parent)
 	ui->mainToolBar->addAction(ui->actionAdd);
 	ui->mainToolBar->addAction(ui->actionRemove);
 	ui->mainToolBar->addAction(ui->actionRefresh);
+	ui->centralWidget->addAction(ui->actionQuit);
 
 	connect(ui->actionPlay, SIGNAL(triggered(bool)), this,
 	        SLOT(startStream(bool)));
