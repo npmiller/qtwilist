@@ -33,9 +33,21 @@ qtwilist::qtwilist(QWidget *parent)
 	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
 	        SLOT(done(int, QProcess::ExitStatus)));
 
+	connect(ui->streamList, &QAbstractItemView::activated, this,
+	        &qtwilist::play);
+
 	QSettings settings;
 	command = settings.value("command", "streamlink twitch.tv/%1 best")
 	              .toString();
+}
+
+void qtwilist::play(const QModelIndex &index) {
+	QString stream_name = list.streams.at(index.row())->name;
+	QStringList cmd = command.arg(stream_name).split(" ");
+	QString prg = cmd.takeFirst();
+	process->start(prg, cmd);
+	ui->statusBar->showMessage("Playing: " + stream_name);
+	ui->actionPlay->setEnabled(false);
 }
 
 void qtwilist::actionAdd(bool checked) {
@@ -61,12 +73,8 @@ void qtwilist::startStream(bool checked) {
 	auto selection = ui->streamList->selectionModel()->selectedIndexes();
 	if (selection.size() <= 0)
 		return;
-	QString stream_name = list.streams.at(selection.at(0).row())->name;
-	QStringList cmd = command.arg(stream_name).split(" ");
-	QString prg = cmd.takeFirst();
-	process->start(prg, cmd);
-	ui->statusBar->showMessage("Playing: " + stream_name);
-	ui->actionPlay->setEnabled(false);
+
+	play(selection.at(0));
 }
 
 void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {

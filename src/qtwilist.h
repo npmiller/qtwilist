@@ -34,6 +34,7 @@ class qtwilist : public QMainWindow {
 	void done(int exitCode, QProcess::ExitStatus exitStatus);
 	void actionAdd(bool checked);
 	void actionRemove(bool checked);
+	void play(const QModelIndex &index);
 
       private:
 	Ui::qtwilist *ui;
