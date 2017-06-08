@@ -42,12 +42,25 @@ qtwilist::qtwilist(QWidget *parent)
 }
 
 void qtwilist::play(const QModelIndex &index) {
-	QString stream_name = list.streams.at(index.row())->name;
-	QStringList cmd = command.arg(stream_name).split(" ");
-	QString prg = cmd.takeFirst();
-	process->start(prg, cmd);
-	ui->statusBar->showMessage("Playing: " + stream_name);
-	ui->actionPlay->setEnabled(false);
+	Stream* s = list.streams.at(index.row());
+	if (s->live) {
+		QStringList cmd = command.arg(s->name).split(" ");
+		QString prg = cmd.takeFirst();
+
+		// if another stream is open close it
+		if (QProcess::NotRunning != process->state()) {
+			process->terminate();
+			// TODO: this is not immediate we need to wait before starting the
+			// new one or use another QProcess while this one cleans up
+		}
+
+		// start playing
+		process->start(prg, cmd);
+
+		// update the ui
+		ui->statusBar->showMessage("Playing: " + s->name);
+		ui->actionPlay->setEnabled(false);
+	}
 }
 
 void qtwilist::actionAdd(bool checked) {
