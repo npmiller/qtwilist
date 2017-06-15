@@ -14,6 +14,8 @@ qtwilist::qtwilist(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::qtwilist), process(new QProcess(this)),
       list() {
 	ui->setupUi(this);
+	setWindowIcon(QIcon(":/icon.svg"));
+
 	ui->streamList->setModel(&list);
 
 	ui->mainToolBar->addAction(ui->actionPlay);
