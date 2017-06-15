@@ -1,0 +1,10 @@
+[Desktop Entry]
+
+Type=Application
+Version=0.1.0
+Name=QTwiList
+Comment=List twitch streamers
+Exec=qtwilist
+Icon=qtwilist
+Categories=AudioVideo;Player;
+Keywords=Twitch

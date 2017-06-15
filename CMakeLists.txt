@@ -21,3 +21,7 @@ add_executable(qtwilist ${qtwilist_SRC} res/icon.qrc)
 target_link_libraries(qtwilist Qt5::Widgets Qt5::Network)
 
 install(TARGETS qtwilist DESTINATION bin)
+install(FILES res/icon.svg
+	DESTINATION share/icons/hicolor/scalable/apps
+	RENAME qtwilist.svg)
+install(FILES res/qtwilist.desktop DESTINATION share/applications)
