@@ -9,6 +9,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -17,7 +18,6 @@
 #include <QSize>
 #include <QStandardPaths>
 
-static constexpr char client_id[] = "";
 static constexpr char url_base[] = "https://api.twitch.tv/kraken";
 
 Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
@@ -34,6 +34,7 @@ Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
 	settings.endGroup();
 	settings.endGroup();
 	
+	// TODO: add slider for logo size
 	if (!logo_path.isEmpty()) {
 		decoration = QIcon(logo_path).pixmap(40 ,40, QIcon::Disabled);
 	} else {
@@ -49,12 +50,10 @@ Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
 
 void Stream::fetch() {
 	qDebug() << "fetch";
+	// TODO: bundle user requests to update logos at startup
 	QNetworkRequest request(
 	    QUrl(QString(url_base) + "/users?login=" + name));
-	request.setRawHeader(QByteArray("Accept"),
-	                     QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"),
-	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	StreamList::prepareRequest(request);
 
 	reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &Stream::finishedUser);
@@ -69,6 +68,19 @@ void Stream::finishedUser() {
 	}
 	QJsonObject obj = doc.object();
 
+	qDebug() << obj;
+
+	// check if the specified user exists
+	if (0 == obj["_total"].toInt()) {
+		// TODO: do this check in the add dialog
+		QMessageBox err;
+		err.setText(
+		    QStringLiteral("User '%1' doesn't exist.").arg(name));
+		err.setIcon(QMessageBox::Warning);
+		err.exec();
+		return;
+	}
+
 	// get user id
 	id = obj["users"].toArray()[0].toObject()["_id"].toString();
 
@@ -80,10 +92,8 @@ void Stream::finishedUser() {
 	// download user logo
 	QNetworkRequest request(
 	    QUrl(obj["users"].toArray()[0].toObject()["logo"].toString()));
-	request.setRawHeader(QByteArray("Accept"),
-	                     QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"),
-	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	StreamList::prepareRequest(request);
+
 	QNetworkReply *logo_reply = manager.get(request);
 	connect(logo_reply, &QNetworkReply::finished, this,
 	        &Stream::finishedLogo);
@@ -101,6 +111,7 @@ void Stream::toggleLive() {
 	live = !live;
 
 	if (!logo_path.isEmpty()) {
+		// TODO: add emblem on logo when live
 		decoration = QIcon(logo_path).pixmap(
 		    40, 40, live ? QIcon::Normal : QIcon::Disabled);
 	}
@@ -140,6 +151,16 @@ void Stream::finishedLogo() {
 	reply->deleteLater();
 	disconnect(reply, &QNetworkReply::finished, this,
 	           &Stream::finishedLogo);
+}
+
+void StreamList::prepareRequest(QNetworkRequest &r) {
+	// set API version
+	r.setRawHeader(QByteArray("Accept"),
+	               QByteArray("application/vnd.twitchtv.v5+json"));
+
+	// set Client ID
+	r.setRawHeader(QByteArray("Client-ID"),
+	               QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
 }
 
 void StreamList::finishedCheckLive() {
@@ -209,11 +230,19 @@ StreamList::StreamList(QObject *parent)
 
 	checkLive();
 
+	// TODO: enable polling? add desktop notifications + systray
 	// check for live channels every minute
 	/* timer.setInterval(1000 * 60); */
 	/* connect(&timer, &QTimer::timeout, this, &StreamList::checkLive); */
 	/* timer.start(); */
-};
+}
+
+StreamList::~StreamList() {
+	// delete stream objects
+	Q_FOREACH (Stream* s, streams) {
+		delete s;
+	}
+}
 
 void StreamList::checkLive() {
 	if (streams.size() < 0) {
@@ -231,10 +260,7 @@ void StreamList::checkLive() {
 
 	// request streams information
 	QNetworkRequest request(url);
-	request.setRawHeader(QByteArray("Accept"),
-	                     QByteArray("application/vnd.twitchtv.v5+json"));
-	request.setRawHeader(QByteArray("Client-ID"),
-	                     QByteArray("cxajit9fktm6qfmkauvlkwmoalrqrs"));
+	StreamList::prepareRequest(request);
 
 	reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this,
@@ -271,7 +297,7 @@ void StreamList::remove(QModelIndex index) {
 
 int StreamList::rowCount(const QModelIndex &parent) const {
 	return streams.size();
-};
+}
 
 QVariant StreamList::data(const QModelIndex &index, int role) const {
 	if (!index.isValid())
@@ -290,4 +316,4 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 	}
 
 	return QVariant();
-};
+}

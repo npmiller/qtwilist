@@ -40,13 +40,16 @@ class Stream : public QObject {
 class StreamList : public QAbstractListModel {
 	Q_OBJECT
       public:
+	static void prepareRequest(QNetworkRequest &r);
+
 	StreamList(QObject *parent = 0);
+	virtual ~StreamList();
+
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual QVariant data(const QModelIndex &index, int role) const;
 
 	void add(QString name);
 	void remove(QModelIndex index);
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual ~StreamList(){};
 
 	QVector<Stream *> streams;
 	QNetworkAccessManager manager;

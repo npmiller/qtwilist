@@ -53,7 +53,8 @@ void qtwilist::play(const QModelIndex &index) {
 		if (QProcess::NotRunning != process->state()) {
 			process->terminate();
 			// TODO: this is not immediate we need to wait before starting the
-			// new one or use another QProcess while this one cleans up
+			// new one or use another QProcess while this one cleans up, maybe
+			// allow multiple stream to play at the same time
 		}
 
 		// start playing
@@ -97,4 +98,7 @@ void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {
 	ui->actionPlay->setEnabled(true);
 }
 
-qtwilist::~qtwilist() { delete ui; }
+qtwilist::~qtwilist() {
+	delete process;
+	delete ui;
+}
