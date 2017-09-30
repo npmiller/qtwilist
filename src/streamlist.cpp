@@ -107,7 +107,7 @@ void Stream::finishedUser() {
 	settings.endGroup();
 }
 
-void Stream::toggleLive() {
+void Stream::toggleLive(QString new_status) {
 	live = !live;
 
 	if (!logo_path.isEmpty()) {
@@ -115,6 +115,9 @@ void Stream::toggleLive() {
 		decoration = QIcon(logo_path).pixmap(
 		    40, 40, live ? QIcon::Normal : QIcon::Disabled);
 	}
+
+	// empty status unless we're live
+	status = live ? new_status : QString();
 }
 
 void Stream::finishedLogo() {
@@ -189,20 +192,20 @@ void StreamList::finishedCheckLive() {
 	for (int i = 0; i < streams.size(); ++i) {
 		bool live = false;
 		Stream *s = streams.at(i);
+		QString status;
 		for (int j = 0; j < total; ++j) {
+			auto channel = arr[j].toObject()["channel"].toObject();
 			if (0 ==
-			    QString::compare(arr[j]
-			                         .toObject()["channel"]
-			                         .toObject()["display_name"]
-			                         .toString(),
+			    QString::compare(channel["display_name"].toString(),
 			                     s->name, Qt::CaseInsensitive)) {
 				qDebug() << "match: " << s->name << i << streams.size();
 				live = true;
+				status = channel["status"].toString();
 			}
 		}
 
 		if (live != s->live) {
-			s->toggleLive();
+			s->toggleLive(status);
 
 			// first index to have changed
 			mini = (mini < 0) ? i : mini;
@@ -313,6 +316,8 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 		return s->name + (s->live ? " - live" : QString());
 	case Qt::DecorationRole:
 		return s->decoration;
+	case Qt::ToolTipRole:
+		return s->status;
 	}
 
 	return QVariant();
