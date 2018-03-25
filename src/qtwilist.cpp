@@ -3,6 +3,7 @@
 #include "ui_qtwilist.h"
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDialog>
 #include <QProcess>
 
@@ -19,6 +20,7 @@ qtwilist::qtwilist(QWidget *parent)
 	ui->streamList->setModel(&list);
 
 	ui->mainToolBar->addAction(ui->actionPlay);
+	ui->mainToolBar->addAction(ui->actionChat);
 	ui->mainToolBar->addAction(ui->actionAdd);
 	ui->mainToolBar->addAction(ui->actionRemove);
 	ui->mainToolBar->addAction(ui->actionRefresh);
@@ -27,6 +29,7 @@ qtwilist::qtwilist(QWidget *parent)
 	connect(ui->actionPlay, SIGNAL(triggered(bool)), this,
 	        SLOT(startStream(bool)));
 	connect(ui->actionAdd, &QAction::triggered, this, &qtwilist::actionAdd);
+	connect(ui->actionChat, &QAction::triggered, this, &qtwilist::actionChat);
 	connect(ui->actionRemove, &QAction::triggered, this,
 	        &qtwilist::actionRemove);
 	connect(ui->actionRefresh, &QAction::triggered, &list,
@@ -74,6 +77,17 @@ void qtwilist::actionAdd(bool checked) {
 			list.add(name);
 		}
 	}
+}
+
+void qtwilist::actionChat(bool checked) {
+	auto selection = ui->streamList->selectionModel()->selectedIndexes();
+	if (selection.size() <= 0)
+		return;
+
+	// Open chat in browser
+	QDesktopServices::openUrl(QUrl("https://www.twitch.tv/" +
+	                               list.streams[selection.at(0).row()]->name +
+	                               "/chat?popout="));
 }
 
 void qtwilist::actionRemove(bool checked) {

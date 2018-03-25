@@ -33,6 +33,7 @@ class qtwilist : public QMainWindow {
 	void startStream(bool checked);
 	void done(int exitCode, QProcess::ExitStatus exitStatus);
 	void actionAdd(bool checked);
+	void actionChat(bool checked);
 	void actionRemove(bool checked);
 	void play(const QModelIndex &index);
 
