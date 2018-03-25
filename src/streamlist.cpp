@@ -21,7 +21,7 @@
 static constexpr char url_base[] = "https://api.twitch.tv/kraken";
 
 Stream::Stream(QString name, QNetworkAccessManager &manager, QObject *parent)
-    : QObject(parent), name(name), live(false), manager(manager),
+    : QObject(parent), name(name), live(false), views(0), manager(manager),
       reply(nullptr) {
 	// load from settings
 	QSettings settings;
@@ -201,18 +201,22 @@ void StreamList::finishedCheckLive() {
 				qDebug() << "match: " << s->name << i << streams.size();
 				live = true;
 				status = channel["status"].toString();
+				s->views = arr[j].toObject()["viewers"].toInt();
 			}
 		}
 
-		if (live != s->live) {
-			s->toggleLive(status);
-
+		if (live || (live != s->live)) {
 			// first index to have changed
 			mini = (mini < 0) ? i : mini;
 
 			// we have a new maximum
 			maxi = i;
 		}
+
+		if (live != s->live) {
+			s->toggleLive(status);
+		}
+
 	}
 
 	// see if we need to notify the change
@@ -271,15 +275,16 @@ void StreamList::checkLive() {
 }
 
 void StreamList::add(QString name) {
+	beginInsertRows(QModelIndex(), streams.size(), streams.size());
 	Stream *s = new Stream(name, manager, this);
 
 	streams.append(s);
 
-	QModelIndex index = createIndex(streams.size() - 1, 0);
-	Q_EMIT dataChanged(index, index);
+	endInsertRows();
 }
 
 void StreamList::remove(QModelIndex index) {
+	beginRemoveRows(QModelIndex(), index.row(), index.row());
 	Stream *s = streams.takeAt(index.row());
 
 	QSettings settings;
@@ -293,7 +298,7 @@ void StreamList::remove(QModelIndex index) {
 		file.remove();
 	}
 
-	Q_EMIT(dataChanged(index, index));
+	endRemoveRows();
 
 	delete s;
 }
@@ -312,8 +317,14 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 	const Stream *s = streams.at(index.row());
 
 	switch (role) {
-	case Qt::DisplayRole:
-		return s->name + (s->live ? " - live" : QString());
+	case Qt::DisplayRole: {
+		QString display = s->name;
+		if (s->live) {
+			display += " - live: %1";
+			display = display.arg(s->views);
+		}
+		return display;
+	}
 	case Qt::DecorationRole:
 		return s->decoration;
 	case Qt::ToolTipRole:
@@ -321,4 +332,18 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 	}
 
 	return QVariant();
+}
+
+StreamSort::StreamSort(QObject *parent) : QSortFilterProxyModel(parent) {}
+
+bool StreamSort::lessThan(const QModelIndex &left, const QModelIndex &right) const {
+	StreamList* list = static_cast<StreamList *>(sourceModel());
+	Stream *l = list->streams.at(left.row());
+	Stream *r = list->streams.at(right.row());
+
+	if (r->live && l->live) {
+		return l->views > r->views;
+	} else {
+		return !r->live && l->live;
+	}
 }

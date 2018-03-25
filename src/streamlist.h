@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QPixmap>
 #include <QSettings>
+#include <QSortFilterProxyModel>
 #include <QSslError>
 #include <QTimer>
 #include <QUrl>
@@ -29,6 +30,7 @@ class Stream : public QObject {
 	QString name;
 	QString status;
 	bool live;
+	uint32_t views;
 	QString logo_path;
 	QString id;
 	QPixmap decoration;
@@ -62,6 +64,14 @@ class StreamList : public QAbstractListModel {
       private:
 	QNetworkReply *reply;
 	QTimer timer;
+};
+
+class StreamSort : public QSortFilterProxyModel {
+	Q_OBJECT
+      public:
+    StreamSort(QObject *parent = 0);
+	bool lessThan(const QModelIndex &left,
+	              const QModelIndex &right) const override;
 };
 
 #endif

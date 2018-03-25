@@ -41,6 +41,7 @@ class qtwilist : public QMainWindow {
 	Ui::qtwilist *ui;
 	QProcess *process;
 	StreamList list;
+	StreamSort *proxy;
 	QString command;
 	QString quality;
 };

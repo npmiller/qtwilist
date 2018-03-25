@@ -17,7 +17,11 @@ qtwilist::qtwilist(QWidget *parent)
 	ui->setupUi(this);
 	setWindowIcon(QIcon(":/icon.svg"));
 
-	ui->streamList->setModel(&list);
+	proxy = new StreamSort(this);
+	proxy->setSourceModel(&list);
+	proxy->setDynamicSortFilter(true);
+	proxy->sort(0);
+	ui->streamList->setModel(proxy);
 
 	ui->mainToolBar->addAction(ui->actionPlay);
 	ui->mainToolBar->addAction(ui->actionChat);
@@ -47,7 +51,7 @@ qtwilist::qtwilist(QWidget *parent)
 }
 
 void qtwilist::play(const QModelIndex &index) {
-	Stream* s = list.streams.at(index.row());
+	Stream *s = list.streams.at(proxy->mapToSource(index).row());
 	if (s->live) {
 		QStringList cmd = command.arg(s->name).split(" ");
 		QString prg = cmd.takeFirst();
@@ -85,9 +89,10 @@ void qtwilist::actionChat(bool checked) {
 		return;
 
 	// Open chat in browser
-	QDesktopServices::openUrl(QUrl("https://www.twitch.tv/" +
-	                               list.streams[selection.at(0).row()]->name +
-	                               "/chat?popout="));
+	QDesktopServices::openUrl(
+	    QUrl("https://www.twitch.tv/" +
+	         list.streams[proxy->mapToSource(selection.at(0)).row()]->name +
+	         "/chat?popout="));
 }
 
 void qtwilist::actionRemove(bool checked) {
@@ -95,7 +100,7 @@ void qtwilist::actionRemove(bool checked) {
 	if (selection.size() <= 0)
 		return;
 
-	list.remove(selection.at(0));
+	list.remove(proxy->mapToSource(selection.at(0)));
 }
 
 void qtwilist::startStream(bool checked) {
@@ -104,7 +109,7 @@ void qtwilist::startStream(bool checked) {
 	if (selection.size() <= 0)
 		return;
 
-	play(selection.at(0));
+	play(proxy->mapToSource(selection.at(0)));
 }
 
 void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {
