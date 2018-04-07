@@ -15,7 +15,6 @@ qtwilist::qtwilist(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::qtwilist), process(new QProcess(this)),
       list() {
 	ui->setupUi(this);
-	setWindowIcon(QIcon(":/icon.svg"));
 
 	proxy = new StreamSort(this);
 	proxy->setSourceModel(&list);

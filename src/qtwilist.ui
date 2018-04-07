@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>qtwilist</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../res/icon.qrc">
+    <normaloff>:/icon.svg</normaloff>:/icon.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
@@ -132,7 +136,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="icon.qrc"/>
+  <include location="../res/icon.qrc"/>
  </resources>
  <connections>
   <connection>
