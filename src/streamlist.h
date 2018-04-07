@@ -12,6 +12,12 @@
 #include <QTimer>
 #include <QUrl>
 
+namespace Ui {
+class qtwilist;
+class adddialog;
+class StreamWidget;
+}
+
 class Stream : public QObject {
 	Q_OBJECT
 
@@ -80,5 +86,17 @@ class StreamSort : public QSortFilterProxyModel {
 	bool lessThan(const QModelIndex &left,
 	              const QModelIndex &right) const override;
 };
+
+/* class StreamDelegate : public QAbstractItemDelegate { */
+/* 	Q_OBJECT */
+/*       public: */
+/* 	StreamDelegate(QWidget *parent = 0) : QAbstractItemDelegate(parent){}; */
+/* 	virtual ~StreamDelegate() {}; */
+
+/* 	void paint(QPainter *painter, const QStyleOptionViewItem &option, */
+/* 	           const QModelIndex &index) const override; */
+/* 	/1* QSize sizeHint(const QStyleOptionViewItem &option, *1/ */
+/* 	/1*                const QModelIndex &index) const override; *1/ */
+/* }; */
 
 #endif

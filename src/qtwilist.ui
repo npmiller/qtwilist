@@ -100,7 +100,8 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset theme="view-refresh"/>
+    <iconset theme="view-refresh">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Refresh</string>

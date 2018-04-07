@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QProcess>
 #include <QSettings>
+#include <QSystemTrayIcon>
 
 namespace Ui {
 class qtwilist;
@@ -42,6 +43,7 @@ class qtwilist : public QMainWindow {
 	QProcess *process;
 	StreamList list;
 	StreamSort *proxy;
+	QSystemTrayIcon *tray;
 	QString command;
 	QString quality;
 };

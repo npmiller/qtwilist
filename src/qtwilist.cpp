@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 #include <QDialog>
 #include <QProcess>
+#include <QSystemTrayIcon>
 
 AddDialog::AddDialog(QWidget *parent) : QDialog(parent), ui(new Ui::adddialog) {
 	ui->setupUi(this);
@@ -15,6 +16,19 @@ qtwilist::qtwilist(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::qtwilist), process(new QProcess(this)),
       list() {
 	ui->setupUi(this);
+
+	if (QSystemTrayIcon::isSystemTrayAvailable()) {
+		tray = new QSystemTrayIcon(this);
+		tray->setIcon(QIcon(":/icon.svg").pixmap(22, 22));
+		tray->show();
+	}
+
+	QMenu* menu = new QMenu(this);
+	menu->addAction(ui->actionAdd);
+	menu->addAction(ui->actionRefresh);
+
+	tray->setContextMenu(menu);
+	tray->showMessage("Test message", "Ye boiii");
 
 	proxy = new StreamSort(this);
 	proxy->setSourceModel(&list);

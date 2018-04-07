@@ -1,4 +1,5 @@
 #include "streamlist.h"
+/* #include "ui_streamwidget.cpp" */
 
 #include <QAbstractListModel>
 #include <QByteArray>
@@ -355,3 +356,10 @@ bool StreamSort::lessThan(const QModelIndex &left, const QModelIndex &right) con
 		return !r_live && l_live;
 	}
 }
+
+/* void paint(QPainter *painter, const QStyleOptionViewItem &option, */
+/*            const QModelIndex &index) const { */
+/* } */
+
+/* QSize sizeHint(const QStyleOptionViewItem &option, */
+/*                const QModelIndex &index) const {} */
