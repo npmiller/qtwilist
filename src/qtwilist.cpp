@@ -30,6 +30,10 @@ qtwilist::qtwilist(QWidget *parent)
 	ui->mainToolBar->addAction(ui->actionRefresh);
 	ui->centralWidget->addAction(ui->actionQuit);
 
+	ui->streamList->addAction(ui->actionPlay);
+	ui->streamList->addAction(ui->actionChat);
+	ui->streamList->addAction(ui->actionRemove);
+
 	connect(ui->actionPlay, SIGNAL(triggered(bool)), this,
 	        SLOT(startStream(bool)));
 	connect(ui->actionAdd, &QAction::triggered, this, &qtwilist::actionAdd);
