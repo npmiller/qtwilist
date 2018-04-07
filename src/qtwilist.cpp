@@ -51,9 +51,10 @@ qtwilist::qtwilist(QWidget *parent)
 }
 
 void qtwilist::play(const QModelIndex &index) {
-	Stream *s = list.streams.at(proxy->mapToSource(index).row());
-	if (s->live) {
-		QStringList cmd = command.arg(s->name).split(" ");
+	bool live = index.data(StreamList::LiveRole).toBool();
+	QString name = index.data(StreamList::NameRole).toString();
+	if (live) {
+		QStringList cmd = command.arg(name).split(" ");
 		QString prg = cmd.takeFirst();
 
 		// if another stream is open close it
@@ -68,7 +69,7 @@ void qtwilist::play(const QModelIndex &index) {
 		process->start(prg, cmd);
 
 		// update the ui
-		ui->statusBar->showMessage("Playing: " + s->name);
+		ui->statusBar->showMessage("Playing: " + name);
 		ui->actionPlay->setEnabled(false);
 	}
 }
@@ -91,7 +92,7 @@ void qtwilist::actionChat(bool checked) {
 	// Open chat in browser
 	QDesktopServices::openUrl(
 	    QUrl("https://www.twitch.tv/" +
-	         list.streams[proxy->mapToSource(selection.at(0)).row()]->name +
+	         selection.at(0).data(StreamList::NameRole).toString() +
 	         "/chat?popout="));
 }
 
@@ -109,7 +110,7 @@ void qtwilist::startStream(bool checked) {
 	if (selection.size() <= 0)
 		return;
 
-	play(proxy->mapToSource(selection.at(0)));
+	play(selection.at(0));
 }
 
 void qtwilist::done(int exitCode, QProcess::ExitStatus exitStatus) {

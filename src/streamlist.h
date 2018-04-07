@@ -43,6 +43,13 @@ class Stream : public QObject {
 class StreamList : public QAbstractListModel {
 	Q_OBJECT
       public:
+
+	enum DataRoles {
+		NameRole = Qt::UserRole,
+		LiveRole,
+		ViewsRole,
+	};
+
 	static void prepareRequest(QNetworkRequest &r);
 
 	StreamList(QObject *parent = 0);

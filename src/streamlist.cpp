@@ -329,6 +329,12 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 		return s->decoration;
 	case Qt::ToolTipRole:
 		return s->status;
+	case StreamList::LiveRole:
+		return s->live;
+	case StreamList::ViewsRole:
+		return s->views;
+	case StreamList::NameRole:
+		return s->name;
 	}
 
 	return QVariant();
@@ -337,13 +343,15 @@ QVariant StreamList::data(const QModelIndex &index, int role) const {
 StreamSort::StreamSort(QObject *parent) : QSortFilterProxyModel(parent) {}
 
 bool StreamSort::lessThan(const QModelIndex &left, const QModelIndex &right) const {
-	StreamList* list = static_cast<StreamList *>(sourceModel());
-	Stream *l = list->streams.at(left.row());
-	Stream *r = list->streams.at(right.row());
+	bool l_live = left.data(StreamList::LiveRole).toBool();
+	bool r_live = right.data(StreamList::LiveRole).toBool();
 
-	if (r->live && l->live) {
-		return l->views > r->views;
+	uint32_t l_views = left.data(StreamList::ViewsRole).toUInt();
+	uint32_t r_views = right.data(StreamList::ViewsRole).toUInt();
+
+	if (r_live && l_live) {
+		return l_views > r_views;
 	} else {
-		return !r->live && l->live;
+		return !r_live && l_live;
 	}
 }
