@@ -168,6 +168,7 @@ void StreamList::prepareRequest(QNetworkRequest &r) {
 
 void StreamList::finishedCheckLive() {
 	qDebug() << "Finished streams";
+	QNetworkReply *reply = static_cast<QNetworkReply *>(QObject::sender());
 	QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
 
 	disconnect(reply, &QNetworkReply::finished, this,
@@ -269,7 +270,7 @@ void StreamList::checkLive() {
 	QNetworkRequest request(url);
 	StreamList::prepareRequest(request);
 
-	reply = manager.get(request);
+	QNetworkReply *reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this,
 	        &StreamList::finishedCheckLive);
 }

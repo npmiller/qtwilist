@@ -69,7 +69,6 @@ class StreamList : public QAbstractListModel {
 	void checkLive();
 
       private:
-	QNetworkReply *reply;
 	QTimer timer;
 };
 
