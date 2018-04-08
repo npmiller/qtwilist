@@ -183,7 +183,7 @@ void StreamList::finishedCheckLive() {
 	QJsonObject obj = doc.object();
 
 	unsigned int total = obj["_total"].toInt();
-	if (total < 0) {
+	if (total <= 0) {
 		return;
 	}
 
@@ -239,11 +239,10 @@ StreamList::StreamList(QObject *parent)
 
 	checkLive();
 
-	// TODO: enable polling? add desktop notifications + systray
 	// check for live channels every minute
-	/* timer.setInterval(1000 * 60); */
-	/* connect(&timer, &QTimer::timeout, this, &StreamList::checkLive); */
-	/* timer.start(); */
+	timer.setInterval(1000 * 60);
+	connect(&timer, &QTimer::timeout, this, &StreamList::checkLive);
+	timer.start();
 }
 
 StreamList::~StreamList() {
