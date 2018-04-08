@@ -135,6 +135,12 @@ void Stream::finishedLogo() {
 	// image/<extension>
 	ext.remove(0, 6);
 
+	// delete any existing logos
+	if (!logo_path.isEmpty()) {
+		QFile file(logo_path);
+		file.remove();
+	}
+
 	logo_path = dir.filePath(name + "_logo." + ext);
 	QFile file(logo_path);
 	file.open(QIODevice::WriteOnly);
@@ -243,6 +249,8 @@ StreamList::StreamList(QObject *parent)
 	timer.setInterval(1000 * 60);
 	connect(&timer, &QTimer::timeout, this, &StreamList::checkLive);
 	timer.start();
+
+	fetchStreams(streams);
 }
 
 StreamList::~StreamList() {
@@ -270,9 +278,90 @@ void StreamList::checkLive() {
 	QNetworkRequest request(url);
 	StreamList::prepareRequest(request);
 
-	reply = manager.get(request);
+	QNetworkReply *reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this,
 	        &StreamList::finishedCheckLive);
+}
+
+void StreamList::fetchStreams(QVector<Stream *> s) {
+	if (s.size() <= 0) {
+		return;
+	}
+
+	QString url = QString(url_base) + "/users?login=";
+	url += s.at(0)->id;
+	for (int i = 1; i < s.size(); ++i) {
+		url += ",";
+		url += s.at(i)->name;
+	}
+	qDebug() << url;
+
+	QNetworkRequest request(url);
+	StreamList::prepareRequest(request);
+
+	QNetworkReply *reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this,
+	        &StreamList::finishedFetchStreams);
+}
+
+void StreamList::finishedFetchStreams() {
+	QNetworkReply *reply = static_cast<QNetworkReply *>(QObject::sender());
+	QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+
+	disconnect(reply, &QNetworkReply::finished, this,
+	           &StreamList::finishedCheckLive);
+	reply->deleteLater();
+
+	if (!doc.isObject()) {
+		qDebug() << "Reply is not a JSON object";
+		return;
+	}
+	QJsonObject obj = doc.object();
+
+	unsigned int total = obj["_total"].toInt();
+	if (total <= 0) {
+		return;
+	}
+
+	QJsonArray arr = obj["users"].toArray();
+	for (int i = 0; i < total; ++i) {
+		QJsonObject user = arr[i].toObject();
+		Stream *stream = nullptr;
+
+		// find the matching stream data entry
+		for (Stream *s : streams) {
+			if (0 == QString::compare(user["name"].toString(),
+			                          s->name,
+			                          Qt::CaseInsensitive)) {
+				stream = s;
+			}
+		}
+
+		// if it's not in our list of stream just skip
+		if (nullptr == stream) {
+			continue;
+		}
+
+		if (stream->id.isEmpty()) {
+			stream->id = user["_id"].toString();
+
+			// store the user id in the settings
+			QSettings settings;
+			settings.beginGroup("streams");
+			settings.beginGroup(stream->name);
+			settings.setValue("id", stream->id);
+			settings.endGroup();
+			settings.endGroup();
+		}
+
+		// download user logo
+		QNetworkRequest request(QUrl(user["logo"].toString()));
+		StreamList::prepareRequest(request);
+
+		QNetworkReply *logo_reply = manager.get(request);
+		connect(logo_reply, &QNetworkReply::finished, stream,
+		        &Stream::finishedLogo);
+	}
 }
 
 void StreamList::add(QString name) {

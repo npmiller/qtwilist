@@ -26,9 +26,9 @@ qtwilist::qtwilist(QWidget *parent)
 	QMenu* menu = new QMenu(this);
 	menu->addAction(ui->actionAdd);
 	menu->addAction(ui->actionRefresh);
+	menu->addAction(ui->actionQuit);
 
 	tray->setContextMenu(menu);
-	tray->showMessage("Test message", "Ye boiii");
 
 	proxy = new StreamSort(this);
 	proxy->setSourceModel(&list);

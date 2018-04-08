@@ -67,12 +67,15 @@ class StreamList : public QAbstractListModel {
 	void add(QString name);
 	void remove(QModelIndex index);
 
+	void fetchStreams(QVector<Stream *> s);
+
 	QVector<Stream *> streams;
 	QNetworkAccessManager manager;
 
       public slots:
 	void finishedCheckLive();
 	void checkLive();
+	void finishedFetchStreams();
 
       private:
 	QTimer timer;
