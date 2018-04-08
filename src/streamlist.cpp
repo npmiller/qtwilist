@@ -252,7 +252,7 @@ StreamList::~StreamList() {
 }
 
 void StreamList::checkLive() {
-	if (streams.size() < 0) {
+	if (streams.size() <= 0) {
 		return;
 	}
 
