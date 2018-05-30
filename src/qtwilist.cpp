@@ -93,10 +93,9 @@ void qtwilist::actionChat(bool checked) {
 		return;
 
 	// Open chat in browser
-	QDesktopServices::openUrl(
-	    QUrl("https://www.twitch.tv/" +
-	         selection.at(0).data(StreamList::NameRole).toString() +
-	         "/chat?popout="));
+	QDesktopServices::openUrl(QUrl(
+	    "https://www.twitch.tv/popout/" +
+	    selection.at(0).data(StreamList::NameRole).toString() + "/chat"));
 }
 
 void qtwilist::actionRemove(bool checked) {
