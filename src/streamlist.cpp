@@ -221,7 +221,7 @@ void StreamList::finishedCheckLive() {
 	}
 
 	// see if we need to notify the change
-	if ((mini > 0) && (maxi >= mini)) {
+	if ((mini >= 0) && (maxi >= mini)) {
 		qDebug() << "Emit data changed" << mini << maxi;
 		Q_EMIT dataChanged(createIndex(mini, 0), createIndex(maxi, 0));
 	}
