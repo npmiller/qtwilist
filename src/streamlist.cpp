@@ -131,8 +131,14 @@ void Stream::finishedLogo() {
 
 	QString ext =
 	    reply->header(QNetworkRequest::ContentTypeHeader).toString();
-	// image/<extension>
-	ext.remove(0, 6);
+	if (ext.startsWith("image/")) {
+		// image/<extension>
+		ext.remove(0, 6);
+	} else {
+		// if the content type is not usable try url extension
+		QString url = reply->url().toString();
+		ext = url.section(".", -1);
+	}
 
 	logo_path = dir.filePath(name + "_logo." + ext);
 	QFile file(logo_path);
