@@ -187,20 +187,14 @@ void StreamList::finishedCheckLive() {
 	}
 	QJsonObject obj = doc.object();
 
-	unsigned int total = obj["_total"].toInt();
-	if (total <= 0) {
-		return;
-	}
-
 	QJsonArray arr = obj["streams"].toArray();
-
 	int mini = -1;
 	int maxi = -1;
 	for (int i = 0; i < streams.size(); ++i) {
 		bool live = false;
 		Stream *s = streams.at(i);
 		QString status;
-		for (int j = 0; j < total; ++j) {
+		for (int j = 0; j < arr.size(); ++j) {
 			auto channel = arr[j].toObject()["channel"].toObject();
 			if (0 ==
 			    QString::compare(channel["display_name"].toString(),
